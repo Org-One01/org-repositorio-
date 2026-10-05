@@ -30,7 +30,7 @@ jobs:
           python-version: '3.10'
 
       - name: Generar el archivo HTML
-        run: python src/generar_pagina.py
+        run: python src/generar-pagina.py
 
       - name: Subir artefacto para GitHub Pages
         uses: actions/upload-pages-artifact@v3
