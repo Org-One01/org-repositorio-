@@ -3,7 +3,7 @@ name: Desplegar Pagina con Suma
 on:
   push:
     branches:
-      - main # Asegúrate de que sea 'main' o 'master' según tu rama
+      - main # Asegúrate de que sea 'main' o 'master' según la rama que utilices
 
 permissions:
   contents: read
@@ -15,10 +15,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # 1. Job para construir y subir los archivos estáticos
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el código
@@ -37,6 +35,14 @@ jobs:
         with:
           path: 'public'
 
+  # 2. Job para publicar el sitio web en GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Desplegar en GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
