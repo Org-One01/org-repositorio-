@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Suma con Django</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f6f8; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #0c4b33; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        .resultado { margin-top: 15px; font-weight: bold; color: #0c4b33; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Calculadora Django</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="number" step="any" name="num1" placeholder="Primer número" required>
+            <input type="number" step="any" name="num2" placeholder="Segundo número" required>
+            <button type="submit">Calcular Suma</button>
+        </form>
+
+        {% if resultado is not None %}
+            <div class="resultado">Resultado: {{ resultado }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>
