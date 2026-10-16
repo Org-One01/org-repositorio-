@@ -50,4 +50,4 @@ jobs:
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
           echo "### 🚀 Estado del Despliegue" >> $GITHUB_STEP_SUMMARY
           echo "* **GitHub Pages:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "* **Render App:** [Abrir Aplicación Django en Render](https://tu-app.onrender.com)" >> $GITHUB_STEP_SUMMARY
+          echo "* **Render App:** [Abrir Aplicación Django en Render](https://org-repositorio.onrender.com)" >> $GITHUB_STEP_SUMMARY
