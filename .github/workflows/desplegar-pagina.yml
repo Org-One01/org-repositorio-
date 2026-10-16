@@ -3,7 +3,7 @@ name: Desplegar Pagina con Suma y Render
 on:
   push:
     branches:
-      - main # Asegúrate de que coincida con tu rama principal (main o master)
+      - main
 
 permissions:
   contents: read
@@ -15,7 +15,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # 1. Job para construir y subir los archivos estáticos
   build:
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +34,6 @@ jobs:
         with:
           path: 'public'
 
-  # 2. Job para publicar el sitio web en GitHub Pages y notificar a Render
   deploy:
     environment:
       name: github-pages
@@ -50,8 +48,6 @@ jobs:
       - name: Activar Despliegue en Render y Mostrar Enlace
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
-          echo "=================================================="
-          echo "🚀 Despliegue activado en Render exitosamente."
-          echo "🔗 Enlace de tu aplicación en Render:"
-          echo "https://org-repositorio.onrender.com"
-          echo "=================================================="
+          echo "### 🚀 Estado del Despliegue" >> $GITHUB_STEP_SUMMARY
+          echo "* **GitHub Pages:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Render App:** [Abrir Aplicación Django en Render](https://tu-app.onrender.com)" >> $GITHUB_STEP_SUMMARY
