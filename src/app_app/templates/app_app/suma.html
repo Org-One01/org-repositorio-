@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suma Multimedia, 3D y Mapa de Rutas</title>
+    <title>Suma Multimedia, 3D, Mapa y Carga con Preview</title>
 
     <!-- Componente web para el modelo 3D -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
-    <!-- 1. CSS de Leaflet y Leaflet Routing Machine -->
+    <!-- CSS de Leaflet y Routing Machine -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
@@ -40,16 +40,17 @@
             text-align: center; 
         }
         .card-full {
-            flex: 1 1 100%; /* Ocupa todo el ancho */
+            flex: 1 1 100%;
         }
         h2, h3 { color: #0c4b33; margin-top: 0; }
-        input { 
+        input[type="number"], input[type="file"] { 
             width: 100%; 
             padding: 10px; 
             margin: 8px 0; 
             box-sizing: border-box; 
             border: 1px solid #ccc; 
             border-radius: 5px; 
+            background: #fafafa;
         }
         button { 
             width: 100%; 
@@ -64,31 +65,56 @@
         }
         button:hover { background: #083323; }
         .resultado { margin-top: 15px; font-weight: bold; color: #0c4b33; font-size: 1.4rem; }
+        .info-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            color: #2e7d32;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        /* Estilos del área de vista previa */
+        .preview-box {
+            margin-top: 15px;
+            padding: 10px;
+            border: 2px dashed #0c4b33;
+            border-radius: 8px;
+            background: #f9fbf9;
+        }
+        .preview-box img, .preview-box video {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        .preview-box audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+        .doc-icon {
+            font-size: 3rem;
+            margin-bottom: 5px;
+        }
         img, video, model-viewer { 
             width: 100%; 
             border-radius: 8px; 
             margin-top: 10px; 
         }
         audio { width: 100%; margin-top: 10px; }
-        
-        /* Estilos del contenedor del Mapa */
         #map { 
             height: 400px; 
             width: 100%; 
             border-radius: 8px; 
             margin-top: 10px; 
         }
-        .instrucciones-mapa {
-            font-size: 0.9rem;
-            color: #555;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Calculadora de Suma (Django) -->
+        <!-- 1. Calculadora de Suma -->
         <div class="card">
             <h2>Calculadora Django</h2>
             <form method="POST">
@@ -103,13 +129,48 @@
             {% endif %}
         </div>
 
-        <!-- Imagen Externa -->
+        <!-- 2. Subida de Archivos con Preview Interactivo -->
+        <div class="card">
+            <h3>Subir Archivos con Preview</h3>
+            <p style="font-size: 0.85rem; color: #666;">Selecciona una imagen, audio, video o documento para ver la previsualización:</p>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" id="inputArchivo" name="archivo_subido" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt" onchange="mostrarPreview(event)" required>
+                
+                <!-- Contenedor dinámico de la Vista Previa -->
+                <div id="preview-container" class="preview-box" style="display: none;"></div>
+
+                <button type="submit">Cargar Archivo al Servidor</button>
+            </form>
+
+         {% if archivo_info %}
+                <div class="info-box">
+                    <strong>¡Archivo procesado con éxito!</strong><br>
+                    📄 <strong>Nombre:</strong> {{ archivo_info.nombre }}<br>
+                    📦 <strong>Tamaño:</strong> {{ archivo_info.tamano }} KB<br>
+                    🏷️ <strong>Tipo:</strong> {{ archivo_info.tipo }}<br><br>
+
+                    <!-- Opciones de Ver y Descargar -->
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <a href="{{ archivo_info.url }}" target="_blank" style="flex: 1; text-align: center; text-decoration: none; background: #0c4b33; color: white; padding: 8px; border-radius: 5px; font-size: 0.9rem;">
+                            👁️ Ver Archivo
+                        </a>
+                        <a href="{{ archivo_info.url }}" download="{{ archivo_info.nombre }}" style="flex: 1; text-align: center; text-decoration: none; background: #0056b3; color: white; padding: 8px; border-radius: 5px; font-size: 0.9rem;">
+                            ⬇️ Descargar Archivo
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 3. Imagen Externa -->
         <div class="card">
             <h3>Imagen Externa</h3>
             <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="Tecnología">
         </div>
 
-        <!-- Audio -->
+        <!-- 4. Audio -->
         <div class="card">
             <h3>Reproductor de Audio</h3>
             <audio controls>
@@ -117,16 +178,15 @@
             </audio>
         </div>
 
-        <!-- Video -->
+        <!-- 5. Video -->
         <div class="card">
             <h3>Video Demostrativo</h3>
             <video controls poster="https://interactive-examples.mdn.mozilla.net/media/cc0-images/flower.jpg">
                 <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-                Tu navegador no soporta la reproducción de video.
             </video>
         </div>
 
-        <!-- Modelo 3D -->
+        <!-- 6. Modelo 3D -->
         <div class="card">
             <h3>Visor de Modelo 3D</h3>
             <model-viewer 
@@ -138,40 +198,80 @@
             </model-viewer>
         </div>
 
-        <!-- 2. Mapa Interactivo con Trazado de Rutas por Calle -->
+        <!-- 7. Mapa Interactivo -->
         <div class="card card-full">
             <h3>Mapa y Trazado de Ruta Real</h3>
-            <p class="instrucciones-mapa">
-                1. Presiona <strong>"Usar mi ubicación"</strong> o haz un <strong>primer clic</strong> en el mapa para fijar el origen.<br>
-                2. Haz un <strong>segundo clic</strong> en cualquier punto para trazar la ruta por las calles.
-            </p>
             <button onclick="obtenerUbicacionActual()">Usar mi Ubicación de Origen</button>
             <div id="map"></div>
         </div>
     </div>
 
-    <!-- 3. JS de Leaflet y Leaflet Routing Machine -->
+    <!-- Scripts de Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
-        // Inicializar el mapa centrado por defecto
-        let map = L.map('map').setView([4.6097, -74.0817], 13); // Coordenadas iniciales (ej. Bogotá)
+        // Función de vista previa inmediata al seleccionar archivo
+        function mostrarPreview(event) {
+            const archivo = event.target.files[0];
+            const container = document.getElementById('preview-container');
+            container.innerHTML = '';
 
-       // Cargar mapas públicos de Esri (No requiere API Key y funciona perfectamente en Render)
+            if (!archivo) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            const url = URL.createObjectURL(archivo);
+            const tipo = archivo.type;
+
+            if (tipo.startsWith('image/')) {
+                // Preview para imágenes
+                const img = document.createElement('img');
+                img.src = url;
+                container.appendChild(img);
+            } else if (tipo.startsWith('audio/')) {
+                // Preview para audios
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = url;
+                container.appendChild(audio);
+            } else if (tipo.startsWith('video/')) {
+                // Preview para videos
+                const video = document.createElement('video');
+                video.controls = true;
+                video.src = url;
+                container.appendChild(video);
+            } else {
+                // Preview básico para Documentos (PDF, Word, Text)
+                container.innerHTML = `
+                    <div class="doc-icon">📁</div>
+                    <strong>${archivo.name}</strong><br>
+                    <small>(${roundSize(archivo.size)} - ${tipo || 'Documento'})</small>
+                `;
+            }
+        }
+
+        function roundSize(bytes) {
+            return (bytes / 1024).toFixed(2) + ' KB';
+        }
+
+        // Configuración de Leaflet
+        let map = L.map('map').setView([4.6097, -74.0817], 13);
+
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+            attribution: 'Tiles &copy; Esri'
         }).addTo(map);
 
         let controlRuta = null;
         let puntoOrigen = null;
         let puntoDestino = null;
 
-        // Función para trazar la ruta real entre origen y destino usando OSRM
         function calcularRuta() {
             if (puntoOrigen && puntoDestino) {
                 if (controlRuta) {
-                    map.removeControl(controlRuta); // Limpia la ruta anterior
+                    map.removeControl(controlRuta);
                 }
 
                 controlRuta = L.Routing.control({
@@ -180,33 +280,30 @@
                         L.latLng(puntoDestino.lat, puntoDestino.lng)
                     ],
                     router: L.Routing.osrmv1({
-                        serviceUrl: 'https://router.project-osrm.org/route/v1' // Servidor público de rutas por calle
+                        serviceUrl: 'https://router.project-osrm.org/route/v1'
                     }),
                     lineOptions: {
                         styles: [{ color: '#0c4b33', weight: 6 }]
                     },
                     language: 'es',
-                    show: false // Oculta el panel de texto con las indicaciones de giro
+                    show: false
                 }).addTo(map);
             }
         }
 
-        // Evento de clic en el mapa para seleccionar Origen y Destino interactiva
         map.on('click', function(e) {
             if (!puntoOrigen) {
                 puntoOrigen = e.latlng;
-                L.marker(puntoOrigen).addTo(map).bindPopup("Origen seleccionado").openPopup();
+                L.marker(puntoOrigen).addTo(map).bindPopup("Origen").openPopup();
             } else if (!puntoDestino) {
                 puntoDestino = e.latlng;
-                L.marker(puntoDestino).addTo(map).bindPopup("Destino seleccionado").openPopup();
+                L.marker(puntoDestino).addTo(map).bindPopup("Destino").openPopup();
                 calcularRuta();
             } else {
-                // Si ya existen ambos, reinicia la selección con el nuevo clic como origen
                 location.reload(); 
             }
         });
 
-        // Obtener la geolocalización GPS del navegador
         function obtenerUbicacionActual() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
@@ -215,12 +312,10 @@
                     puntoOrigen = { lat: lat, lng: lng };
 
                     map.setView([lat, lng], 15);
-                    L.marker([lat, lng]).addTo(map).bindPopup("Tu ubicación actual (Origen)").openPopup();
+                    L.marker([lat, lng]).addTo(map).bindPopup("Tu ubicación").openPopup();
                 }, (error) => {
-                    alert("No se pudo obtener la ubicación: " + error.message);
+                    alert("Error de ubicación: " + error.message);
                 });
-            } else {
-                alert("La geolocalización no está soportada por tu navegador.");
             }
         }
     </script>
