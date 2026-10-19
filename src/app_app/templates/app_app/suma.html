@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suma Multimedia y 3D con Django</title>
+    <title>Suma Multimedia, 3D y Mapa de Rutas</title>
 
-    <!-- Componente web de Google para renderizar modelos 3D (.glb / .gltf) -->
+    <!-- Componente web para el modelo 3D -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+    <!-- 1. CSS de Leaflet y Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
     <style>
         body { 
@@ -34,6 +38,9 @@
             flex: 1 1 350px;
             box-sizing: border-box;
             text-align: center; 
+        }
+        .card-full {
+            flex: 1 1 100%; /* Ocupa todo el ancho */
         }
         h2, h3 { color: #0c4b33; margin-top: 0; }
         input { 
@@ -63,21 +70,25 @@
             margin-top: 10px; 
         }
         audio { width: 100%; margin-top: 10px; }
-        .geo-box { 
-            background: #e8f5e9; 
-            border: 1px solid #c8e6c9; 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin-top: 10px;
-            font-size: 0.95rem;
-            color: #2e7d32;
+        
+        /* Estilos del contenedor del Mapa */
+        #map { 
+            height: 400px; 
+            width: 100%; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+        }
+        .instrucciones-mapa {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- 1. Calculadora de Suma (Django) -->
+        <!-- Calculadora de Suma (Django) -->
         <div class="card">
             <h2>Calculadora Django</h2>
             <form method="POST">
@@ -92,73 +103,124 @@
             {% endif %}
         </div>
 
-        <!-- 2. Sección de Imagen Externa -->
+        <!-- Imagen Externa -->
         <div class="card">
             <h3>Imagen Externa</h3>
-            <p>Ejemplo cargado vía URL web:</p>
             <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="Tecnología">
         </div>
 
-        <!-- 3. Sección de Audio Explicativo -->
+        <!-- Audio -->
         <div class="card">
             <h3>Reproductor de Audio</h3>
-            <p>Audio alojado en línea:</p>
             <audio controls>
                 <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-                Tu navegador no soporta el elemento de audio.
             </audio>
         </div>
 
-        <!-- 4. Sección de Video -->
+        <!-- Video -->
         <div class="card">
             <h3>Video Demostrativo</h3>
-            <video controls poster="https://peach.blender.org/wp-content/uploads/title_sq.jpg">
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            <video controls poster="https://interactive-examples.mdn.mozilla.net/media/cc0-images/flower.jpg">
+                <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
                 Tu navegador no soporta la reproducción de video.
             </video>
         </div>
 
-        <!-- 5. Geolocalización del Usuario -->
-        <div class="card">
-            <h3>Geolocalización GPS</h3>
-            <button onclick="obtenerUbicacion()">Obtener mi Ubicación</button>
-            <div id="geo-info" class="geo-box" style="display:none;"></div>
-        </div>
-
-        <!-- 6. Modelo 3D Interactivo -->
+        <!-- Modelo 3D -->
         <div class="card">
             <h3>Visor de Modelo 3D</h3>
-            <p>Arrastra para rotar el objeto:</p>
             <model-viewer 
                 src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-                alt="Modelo 3D de un Astronauta" 
+                alt="Astronauta" 
                 auto-rotate 
                 camera-controls 
                 style="height: 250px; background-color: #222;">
             </model-viewer>
         </div>
+
+        <!-- 2. Mapa Interactivo con Trazado de Rutas por Calle -->
+        <div class="card card-full">
+            <h3>Mapa y Trazado de Ruta Real</h3>
+            <p class="instrucciones-mapa">
+                1. Presiona <strong>"Usar mi ubicación"</strong> o haz un <strong>primer clic</strong> en el mapa para fijar el origen.<br>
+                2. Haz un <strong>segundo clic</strong> en cualquier punto para trazar la ruta por las calles.
+            </p>
+            <button onclick="obtenerUbicacionActual()">Usar mi Ubicación de Origen</button>
+            <div id="map"></div>
+        </div>
     </div>
 
+    <!-- 3. JS de Leaflet y Leaflet Routing Machine -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
     <script>
-        function obtenerUbicacion() {
-            const geoBox = document.getElementById('geo-info');
-            if (navigator.geolocation) {
-                geoBox.style.display = 'block';
-                geoBox.textContent = 'Obteniendo coordenadas...';
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        geoBox.innerHTML = `<strong>Latitud:</strong> ${lat.toFixed(4)}<br><strong>Longitud:</strong> ${lon.toFixed(4)}`;
+        // Inicializar el mapa centrado por defecto
+        let map = L.map('map').setView([4.6097, -74.0817], 13); // Coordenadas iniciales (ej. Bogotá)
+
+        // Cargar las capas de mapa gratuitas de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let controlRuta = null;
+        let puntoOrigen = null;
+        let puntoDestino = null;
+
+        // Función para trazar la ruta real entre origen y destino usando OSRM
+        function calcularRuta() {
+            if (puntoOrigen && puntoDestino) {
+                if (controlRuta) {
+                    map.removeControl(controlRuta); // Limpia la ruta anterior
+                }
+
+                controlRuta = L.Routing.control({
+                    waypoints: [
+                        L.latLng(puntoOrigen.lat, puntoOrigen.lng),
+                        L.latLng(puntoDestino.lat, puntoDestino.lng)
+                    ],
+                    router: L.Routing.osrmv1({
+                        serviceUrl: 'https://router.project-osrm.org/route/v1' // Servidor público de rutas por calle
+                    }),
+                    lineOptions: {
+                        styles: [{ color: '#0c4b33', weight: 6 }]
                     },
-                    (error) => {
-                        geoBox.style.color = '#c62828';
-                        geoBox.textContent = 'Error al obtener la ubicación: ' + error.message;
-                    }
-                );
+                    language: 'es',
+                    show: false // Oculta el panel de texto con las indicaciones de giro
+                }).addTo(map);
+            }
+        }
+
+        // Evento de clic en el mapa para seleccionar Origen y Destino interactiva
+        map.on('click', function(e) {
+            if (!puntoOrigen) {
+                puntoOrigen = e.latlng;
+                L.marker(puntoOrigen).addTo(map).bindPopup("Origen seleccionado").openPopup();
+            } else if (!puntoDestino) {
+                puntoDestino = e.latlng;
+                L.marker(puntoDestino).addTo(map).bindPopup("Destino seleccionado").openPopup();
+                calcularRuta();
             } else {
-                geoBox.style.display = 'block';
-                geoBox.textContent = 'La geolocalización no es soportada por este navegador.';
+                // Si ya existen ambos, reinicia la selección con el nuevo clic como origen
+                location.reload(); 
+            }
+        });
+
+        // Obtener la geolocalización GPS del navegador
+        function obtenerUbicacionActual() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    puntoOrigen = { lat: lat, lng: lng };
+
+                    map.setView([lat, lng], 15);
+                    L.marker([lat, lng]).addTo(map).bindPopup("Tu ubicación actual (Origen)").openPopup();
+                }, (error) => {
+                    alert("No se pudo obtener la ubicación: " + error.message);
+                });
+            } else {
+                alert("La geolocalización no está soportada por tu navegador.");
             }
         }
     </script>
