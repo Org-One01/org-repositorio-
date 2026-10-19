@@ -2,28 +2,165 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Suma con Django</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suma Multimedia y 3D con Django</title>
+
+    <!-- Componente web de Google para renderizar modelos 3D (.glb / .gltf) -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f6f8; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 320px; text-align: center; }
-        input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        button { width: 100%; padding: 10px; background: #0c4b33; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f4f6f8; 
+            margin: 0; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 900px;
+            width: 100%;
+        }
+        .card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            flex: 1 1 350px;
+            box-sizing: border-box;
+            text-align: center; 
+        }
+        h2, h3 { color: #0c4b33; margin-top: 0; }
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 8px 0; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background: #0c4b33; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            margin-top: 5px;
+        }
+        button:hover { background: #083323; }
         .resultado { margin-top: 15px; font-weight: bold; color: #0c4b33; font-size: 1.4rem; }
+        img, video, model-viewer { 
+            width: 100%; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+        }
+        audio { width: 100%; margin-top: 10px; }
+        .geo-box { 
+            background: #e8f5e9; 
+            border: 1px solid #c8e6c9; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #2e7d32;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Calculadora Django</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="number" step="any" name="num1" placeholder="Primer número" required>
-            <input type="number" step="any" name="num2" placeholder="Segundo número" required>
-            <button type="submit">Calcular Suma</button>
-        </form>
 
-        {% if resultado is not None %}
-            <div class="resultado">Resultado: {{ resultado }}</div>
-        {% endif %}
+    <div class="container">
+        <!-- 1. Calculadora de Suma (Django) -->
+        <div class="card">
+            <h2>Calculadora Django</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="number" step="any" name="num1" placeholder="Primer número" required>
+                <input type="number" step="any" name="num2" placeholder="Segundo número" required>
+                <button type="submit">Calcular Suma</button>
+            </form>
+
+            {% if resultado is not None %}
+                <div class="resultado">Resultado: {{ resultado }}</div>
+            {% endif %}
+        </div>
+
+        <!-- 2. Sección de Imagen Externa -->
+        <div class="card">
+            <h3>Imagen Externa</h3>
+            <p>Ejemplo cargado vía URL web:</p>
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="Tecnología">
+        </div>
+
+        <!-- 3. Sección de Audio Explicativo -->
+        <div class="card">
+            <h3>Reproductor de Audio</h3>
+            <p>Audio alojado en línea:</p>
+            <audio controls>
+                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                Tu navegador no soporta el elemento de audio.
+            </audio>
+        </div>
+
+        <!-- 4. Sección de Video -->
+        <div class="card">
+            <h3>Video Demostrativo</h3>
+            <video controls poster="https://peach.blender.org/wp-content/uploads/title_sq.jpg">
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                Tu navegador no soporta la reproducción de video.
+            </video>
+        </div>
+
+        <!-- 5. Geolocalización del Usuario -->
+        <div class="card">
+            <h3>Geolocalización GPS</h3>
+            <button onclick="obtenerUbicacion()">Obtener mi Ubicación</button>
+            <div id="geo-info" class="geo-box" style="display:none;"></div>
+        </div>
+
+        <!-- 6. Modelo 3D Interactivo -->
+        <div class="card">
+            <h3>Visor de Modelo 3D</h3>
+            <p>Arrastra para rotar el objeto:</p>
+            <model-viewer 
+                src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                alt="Modelo 3D de un Astronauta" 
+                auto-rotate 
+                camera-controls 
+                style="height: 250px; background-color: #222;">
+            </model-viewer>
+        </div>
     </div>
+
+    <script>
+        function obtenerUbicacion() {
+            const geoBox = document.getElementById('geo-info');
+            if (navigator.geolocation) {
+                geoBox.style.display = 'block';
+                geoBox.textContent = 'Obteniendo coordenadas...';
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        geoBox.innerHTML = `<strong>Latitud:</strong> ${lat.toFixed(4)}<br><strong>Longitud:</strong> ${lon.toFixed(4)}`;
+                    },
+                    (error) => {
+                        geoBox.style.color = '#c62828';
+                        geoBox.textContent = 'Error al obtener la ubicación: ' + error.message;
+                    }
+                );
+            } else {
+                geoBox.style.display = 'block';
+                geoBox.textContent = 'La geolocalización no es soportada por este navegador.';
+            }
+        }
+    </script>
 </body>
 </html>
