@@ -158,11 +158,9 @@
         // Inicializar el mapa centrado por defecto
         let map = L.map('map').setView([4.6097, -74.0817], 13); // Coordenadas iniciales (ej. Bogotá)
 
-       // Cargar capas de CartoDB (no requiere autenticación ni bloquea Render)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
+       // Cargar mapas públicos de Esri (No requiere API Key y funciona perfectamente en Render)
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
         }).addTo(map);
 
         let controlRuta = null;
