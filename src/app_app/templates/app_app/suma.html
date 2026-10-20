@@ -363,15 +363,11 @@
             <div class="db-selector-container">
                 <label style="font-weight: bold; color: var(--text-main); font-size: 1.1rem;">Seleccionar Base de Datos Activa:</label>
                 <div class="db-selector-links">
-                    <a href="/?db=default" class="db-btn {% if db_seleccionada == 'default' %}active{% endif %}">
-                        SQLite Local
+                    {% for database in database_options %}
+                    <a href="/?db={{ database.alias }}" class="db-btn {% if db_seleccionada == database.alias %}active{% endif %}">
+                        {{ database.label }}
                     </a>
-                    <a href="/?db=postgres" class="db-btn {% if db_seleccionada == 'postgres' %}active{% endif %}">
-                        PostgreSQL (Neon)
-                    </a>
-                    <a href="/?db=mysql" class="db-btn {% if db_seleccionada == 'mysql' %}active{% endif %}">
-                        MySQL (Aiven)
-                    </a>
+                    {% endfor %}
                 </div>
                 <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
                     Motor en uso: <strong style="color: var(--accent);">{{ engine_name }}</strong> (Alias: <code style="background: #000; padding: 2px 6px; border-radius: 4px;">{{ db_seleccionada }}</code>)

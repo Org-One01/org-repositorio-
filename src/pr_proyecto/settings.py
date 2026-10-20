@@ -75,14 +75,20 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+DATABASE_LABELS = {'default': 'SQLite Local'}
 
-# 1. Configuración de PostgreSQL (Neon) desde .env
-postgres_url = os.getenv('DATABASE_POSTGRES_URL', '')
+# 1. Configuración de PostgreSQL (Neon) desde .env o DATABASE_URL
+postgres_url = (
+    os.getenv('DATABASE_POSTGRES_URL')
+    or os.getenv('NEON_DATABASE_URL')
+    or os.getenv('DATABASE_URL', '')
+)
 
 if postgres_url.startswith(('postgres://', 'postgresql://')):
     DATABASES['postgres'] = dj_database_url.parse(postgres_url)
+    DATABASE_LABELS['postgres'] = 'PostgreSQL (Neon)'
 else:
-    DATABASES['postgres'] = DATABASES['default']
+    DATABASES.pop('postgres', None)
 
 
 # 2. Configuración de MySQL (Aiven) desde .env
@@ -95,8 +101,9 @@ if clean_mysql_url.startswith(('mysql://', 'mysql2://')):
     DATABASES['mysql']['OPTIONS'] = {
         'ssl': {'ssl-mode': 'REQUIRED'} if os.name == 'nt' else True
     }
+    DATABASE_LABELS['mysql'] = 'MySQL (Aiven)'
 else:
-    DATABASES['mysql'] = DATABASES['default']
+    DATABASES.pop('mysql', None)
 
 
 # Password validation
