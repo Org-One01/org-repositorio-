@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Prenda</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; padding: 40px; display: flex; justify-content: center; }
+        .card { background: #1e1e1e; padding: 2rem; border-radius: 12px; border: 1px solid #333; max-width: 500px; width: 100%; }
+        h2 { color: #20c997; margin-top: 0; }
+        label { display: block; margin-top: 10px; color: #a0a0a0; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; background: #2a2a2a; border: 1px solid #333; border-radius: 6px; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #20c997; color: #121212; border: none; border-radius: 6px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        button:hover { background: #1ba87e; }
+        .btn-cancel { display: block; text-align: center; margin-top: 15px; color: #a0a0a0; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>✏️ Editar Prenda</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <label>Nombre:</label>
+            <input type="text" name="nombre" value="{{ producto.nombre }}" required>
+
+            <label>Categoría:</label>
+            <select name="categoria">
+                <option value="CAMISA" {% if producto.categoria == 'CAMISA' %}selected{% endif %}>Camisa / Camiseta</option>
+                <option value="PANTALON" {% if producto.categoria == 'PANTALON' %}selected{% endif %}>Pantalón / Jean</option>
+                <option value="CHAQUETA" {% if producto.categoria == 'CHAQUETA' %}selected{% endif %}>Chaqueta / Abrigo</option>
+                <option value="CALZADO" {% if producto.categoria == 'CALZADO' %}selected{% endif %}>Calzado</option>
+                <option value="ACCESORIO" {% if producto.categoria == 'ACCESORIO' %}selected{% endif %}>Accesorio</option>
+            </select>
+
+            <label>Talla:</label>
+            <input type="text" name="talla" value="{{ producto.talla }}" required>
+
+            <label>Precio ($):</label>
+            <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" required>
+
+            <button type="submit">Guardar Cambios</button>
+            <a href="/?db={{ db_engine }}" class="btn-cancel">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

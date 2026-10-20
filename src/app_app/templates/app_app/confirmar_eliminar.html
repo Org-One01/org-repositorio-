@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar Eliminación</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; padding: 40px; display: flex; justify-content: center; }
+        .card { background: #1e1e1e; padding: 2rem; border-radius: 12px; border: 1px solid #ef4444; max-width: 450px; width: 100%; text-align: center; }
+        h2 { color: #ef4444; margin-top: 0; }
+        button { width: 100%; padding: 12px; background: #ef4444; color: #fff; border: none; border-radius: 6px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        button:hover { background: #dc2626; }
+        .btn-cancel { display: block; text-align: center; margin-top: 15px; color: #a0a0a0; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🗑️ Eliminar Prenda</h2>
+        <p>¿Estás seguro de que deseas eliminar <strong>"{{ producto.nombre }}"</strong> de la base de datos <code>{{ db_engine }}</code>?</p>
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit">Sí, Eliminar</button>
+            <a href="/?db={{ db_engine }}" class="btn-cancel">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

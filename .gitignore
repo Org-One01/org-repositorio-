@@ -225,3 +225,5 @@ staticfiles/
 
 media/
 src/media/
+
+.env

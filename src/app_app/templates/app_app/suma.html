@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suma Multimedia, 3D, Mapa y Carga con Preview</title>
+    <title>Panel de Control - Suma, Multimedia y Catálogo</title>
 
     <!-- Componente web para el modelo 3D -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
@@ -13,101 +13,293 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 
     <style>
+        :root {
+            --bg-main: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2a2a2a;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #20c997;
+            --accent-hover: #1ba87e;
+            --border-color: #333333;
+        }
+
         body { 
-            font-family: Arial, sans-serif; 
-            background: #f4f6f8; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-main);
             margin: 0; 
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            line-height: 1.6;
         }
+
         .container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
         }
+
         .card { 
-            background: white; 
+            background: var(--bg-card); 
             padding: 1.5rem; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4); 
+            border: 1px solid var(--border-color);
             flex: 1 1 350px;
             box-sizing: border-box;
             text-align: center; 
+            transition: transform 0.2s ease;
         }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
         .card-full {
             flex: 1 1 100%;
+            text-align: left;
         }
-        h2, h3 { color: #0c4b33; margin-top: 0; }
-        input[type="number"], input[type="file"] { 
+
+        h2, h3, h4 { 
+            color: var(--accent); 
+            margin-top: 0; 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Estilos de Formularios e Inputs */
+        input[type="number"], input[type="text"], input[type="file"], select { 
             width: 100%; 
-            padding: 10px; 
+            padding: 12px; 
             margin: 8px 0; 
             box-sizing: border-box; 
-            border: 1px solid #ccc; 
-            border-radius: 5px; 
-            background: #fafafa;
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            background: var(--bg-input);
+            color: var(--text-main);
+            font-family: inherit;
+            transition: border-color 0.2s;
         }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Personalización de inputs de archivo */
+        input[type="file"]::file-selector-button {
+            background-color: var(--bg-card);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.2s;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: var(--accent);
+            color: var(--bg-main);
+        }
+
         button { 
             width: 100%; 
-            padding: 10px; 
-            background: #0c4b33; 
-            color: white; 
+            padding: 12px; 
+            background: var(--accent); 
+            color: var(--bg-main); 
             border: none; 
-            border-radius: 5px; 
+            border-radius: 6px; 
             cursor: pointer; 
             font-size: 1rem; 
-            margin-top: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background 0.3s ease;
         }
-        button:hover { background: #083323; }
-        .resultado { margin-top: 15px; font-weight: bold; color: #0c4b33; font-size: 1.4rem; }
+
+        button:hover { 
+            background: var(--accent-hover); 
+        }
+
+        /* Resultados y Cajas de Información */
+        .resultado { 
+            margin-top: 15px; 
+            font-weight: bold; 
+            color: var(--accent); 
+            font-size: 1.5rem; 
+            background: var(--bg-input);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
         .info-box {
             margin-top: 15px;
-            padding: 12px;
-            background: #e8f5e9;
-            border: 1px solid #c8e6c9;
-            border-radius: 6px;
-            color: #2e7d32;
+            padding: 15px;
+            background: rgba(32, 201, 151, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--text-main);
             text-align: left;
             font-size: 0.95rem;
         }
-        /* Estilos del área de vista previa */
+
+        /* Área de vista previa */
         .preview-box {
             margin-top: 15px;
-            padding: 10px;
-            border: 2px dashed #0c4b33;
+            padding: 15px;
+            border: 2px dashed var(--accent);
             border-radius: 8px;
-            background: #f9fbf9;
+            background: rgba(0,0,0,0.2);
         }
+
         .preview-box img, .preview-box video {
             max-width: 100%;
             max-height: 250px;
             border-radius: 6px;
             margin-top: 8px;
         }
+
         .preview-box audio {
             width: 100%;
             margin-top: 8px;
         }
+
         .doc-icon {
             font-size: 3rem;
             margin-bottom: 5px;
+            color: var(--accent);
         }
+
+        /* Multimedia General */
         img, video, model-viewer { 
             width: 100%; 
             border-radius: 8px; 
             margin-top: 10px; 
+            background: #000;
         }
-        audio { width: 100%; margin-top: 10px; }
+        
+        audio { width: 100%; margin-top: 10px; filter: invert(100%) hue-rotate(180deg); }
+
+        /* Mapa */
         #map { 
             height: 400px; 
             width: 100%; 
             border-radius: 8px; 
-            margin-top: 10px; 
+            margin-top: 15px; 
+            border: 1px solid var(--border-color);
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
+        /* Selector de Base de Datos */
+        .db-selector-container {
+            margin-bottom: 20px; 
+            padding: 15px; 
+            background: var(--bg-input); 
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .db-selector-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .db-btn {
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            background: var(--bg-main);
+        }
+
+        .db-btn:hover {
+            color: var(--text-main);
+            border-color: var(--accent);
+        }
+
+        .db-btn.active {
+            background: var(--accent); 
+            color: var(--bg-main);
+            border-color: var(--accent);
+        }
+
+        /* Tablas */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            background: var(--bg-input);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #252525;
+            color: var(--accent);
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Estilos para los botones de la tabla */
+        .btn-action {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: bold;
+            margin-right: 5px;
+            transition: opacity 0.2s;
+        }
+        .btn-action:hover { opacity: 0.85; }
+        .btn-warning { background-color: #f59e0b; color: #000; }
+        .btn-danger { background-color: #ef4444; color: #fff; }
+
+        /* Formulario del catálogo */
+        .catalogo-form {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -116,7 +308,7 @@
     <div class="container">
         <!-- 1. Calculadora de Suma -->
         <div class="card">
-            <h2>Calculadora Django</h2>
+            <h2>Calculadora</h2>
             <form method="POST">
                 {% csrf_token %}
                 <input type="number" step="any" name="num1" placeholder="Primer número" required>
@@ -131,8 +323,8 @@
 
         <!-- 2. Subida de Archivos con Preview Interactivo -->
         <div class="card">
-            <h3>Subir Archivos con Preview</h3>
-            <p style="font-size: 0.85rem; color: #666;">Selecciona una imagen, audio, video o documento para ver la previsualización:</p>
+            <h3>Subir Archivos</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Selecciona imagen, audio, video o documento:</p>
             
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -144,33 +336,131 @@
                 <button type="submit">Cargar Archivo al Servidor</button>
             </form>
 
-         {% if archivo_info %}
+            {% if archivo_info %}
                 <div class="info-box">
-                    <strong>¡Archivo procesado con éxito!</strong><br>
+                    <strong style="color: var(--accent);">¡Archivo procesado con éxito!</strong><br><br>
                     📄 <strong>Nombre:</strong> {{ archivo_info.nombre }}<br>
                     📦 <strong>Tamaño:</strong> {{ archivo_info.tamano }} KB<br>
                     🏷️ <strong>Tipo:</strong> {{ archivo_info.tipo }}<br><br>
 
-                    <!-- Opciones de Ver y Descargar -->
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <a href="{{ archivo_info.url }}" target="_blank" style="flex: 1; text-align: center; text-decoration: none; background: #0c4b33; color: white; padding: 8px; border-radius: 5px; font-size: 0.9rem;">
-                            👁️ Ver Archivo
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{{ archivo_info.url }}" target="_blank" style="flex: 1; text-align: center; text-decoration: none; background: var(--accent); color: var(--bg-main); padding: 10px; border-radius: 6px; font-weight: bold;">
+                            👁️ Ver
                         </a>
-                        <a href="{{ archivo_info.url }}" download="{{ archivo_info.nombre }}" style="flex: 1; text-align: center; text-decoration: none; background: #0056b3; color: white; padding: 8px; border-radius: 5px; font-size: 0.9rem;">
-                            ⬇️ Descargar Archivo
+                        <a href="{{ archivo_info.url }}" download="{{ archivo_info.nombre }}" style="flex: 1; text-align: center; text-decoration: none; background: #3b82f6; color: white; padding: 10px; border-radius: 6px; font-weight: bold;">
+                            ⬇️ Descargar
                         </a>
                     </div>
                 </div>
             {% endif %}
         </div>
 
-        <!-- 3. Imagen Externa -->
+        <!-- 3. Catálogo de Ropa y Selector de Base de Datos -->
+        <div class="card card-full">
+            <h3>Catálogo de Ropa en la Nube</h3>
+            
+            <!-- Selector interactivo de Base de Datos -->
+            <div class="db-selector-container">
+                <label style="font-weight: bold; color: var(--text-main); font-size: 1.1rem;">Seleccionar Base de Datos Activa:</label>
+                <div class="db-selector-links">
+                    <a href="/?db=default" class="db-btn {% if db_seleccionada == 'default' %}active{% endif %}">
+                        SQLite Local
+                    </a>
+                    <a href="/?db=postgres" class="db-btn {% if db_seleccionada == 'postgres' %}active{% endif %}">
+                        PostgreSQL (Neon)
+                    </a>
+                    <a href="/?db=mysql" class="db-btn {% if db_seleccionada == 'mysql' %}active{% endif %}">
+                        MySQL (Aiven)
+                    </a>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+                    Motor en uso: <strong style="color: var(--accent);">{{ engine_name }}</strong> (Alias: <code style="background: #000; padding: 2px 6px; border-radius: 4px;">{{ db_seleccionada }}</code>)
+                </p>
+            </div>
+
+            <!-- Formulario para agregar prendas -->
+            <form method="POST" class="catalogo-form">
+                {% csrf_token %}
+                <input type="hidden" name="guardar_ropa" value="1">
+                <input type="hidden" name="db_activa" value="{{ db_seleccionada }}">
+                
+                <div class="form-group">
+                    <label>Nombre prenda:</label>
+                    <input type="text" name="nombre_ropa" placeholder="Ej: Camiseta Oversize" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoría:</label>
+                    <select name="categoria_ropa">
+                        <option value="CAMISA">Camisa / Camiseta</option>
+                        <option value="PANTALON">Pantalón / Jean</option>
+                        <option value="CHAQUETA">Chaqueta / Abrigo</option>
+                        <option value="CALZADO">Calzado</option>
+                        <option value="ACCESORIO">Accesorio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Talla:</label>
+                    <input type="text" name="talla_ropa" placeholder="S, M, L, XL" required>
+                </div>
+                <div class="form-group">
+                    <label>Precio ($):</label>
+                    <input type="number" step="0.01" name="precio_ropa" placeholder="49.99" required>
+                </div>
+                <div style="grid-column: 1 / -1; margin-top: 10px;">
+                    <button type="submit">Guardar Prenda en {{ engine_name }}</button>
+                </div>
+            </form>
+
+            <!-- Tabla de prendas registradas -->
+            <h4 style="margin-top: 30px;">Prendas Guardadas en {{ engine_name }}</h4>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Talla</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos_ropa %}
+                        <tr>
+                            <td>{{ producto.id }}</td>
+                            <td>{{ producto.nombre }}</td>
+                            <td>{{ producto.categoria }}</td>
+                            <td>{{ producto.talla }}</td>
+                            <td>${{ producto.precio }}</td>
+                            <td>
+                                <a href="{% url 'editar_producto' db_engine=db_seleccionada pk=producto.id %}" class="btn-action btn-warning">
+                                    ✏️ Editar
+                                </a>
+                                <a href="{% url 'eliminar_producto' db_engine=db_seleccionada pk=producto.id %}" class="btn-action btn-danger">
+                                    🗑️ Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                No hay prendas registradas aún en {{ engine_name }}.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 4. Imagen Externa -->
         <div class="card">
             <h3>Imagen Externa</h3>
             <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="Tecnología">
         </div>
 
-        <!-- 4. Audio -->
+        <!-- 5. Audio -->
         <div class="card">
             <h3>Reproductor de Audio</h3>
             <audio controls>
@@ -178,7 +468,7 @@
             </audio>
         </div>
 
-        <!-- 5. Video -->
+        <!-- 6. Video -->
         <div class="card">
             <h3>Video Demostrativo</h3>
             <video controls poster="https://interactive-examples.mdn.mozilla.net/media/cc0-images/flower.jpg">
@@ -186,7 +476,7 @@
             </video>
         </div>
 
-        <!-- 6. Modelo 3D -->
+        <!-- 7. Modelo 3D -->
         <div class="card">
             <h3>Visor de Modelo 3D</h3>
             <model-viewer 
@@ -194,14 +484,14 @@
                 alt="Astronauta" 
                 auto-rotate 
                 camera-controls 
-                style="height: 250px; background-color: #222;">
+                style="height: 250px; background-color: #111;">
             </model-viewer>
         </div>
 
-        <!-- 7. Mapa Interactivo -->
+        <!-- 8. Mapa Interactivo -->
         <div class="card card-full">
             <h3>Mapa y Trazado de Ruta Real</h3>
-            <button onclick="obtenerUbicacionActual()">Usar mi Ubicación de Origen</button>
+            <button onclick="obtenerUbicacionActual()" style="max-width: 300px; margin: 0 auto 15px auto; display: block;">Usar mi Ubicación de Origen</button>
             <div id="map"></div>
         </div>
     </div>
@@ -211,7 +501,6 @@
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
-        // Función de vista previa inmediata al seleccionar archivo
         function mostrarPreview(event) {
             const archivo = event.target.files[0];
             const container = document.getElementById('preview-container');
@@ -227,28 +516,25 @@
             const tipo = archivo.type;
 
             if (tipo.startsWith('image/')) {
-                // Preview para imágenes
                 const img = document.createElement('img');
                 img.src = url;
                 container.appendChild(img);
             } else if (tipo.startsWith('audio/')) {
-                // Preview para audios
                 const audio = document.createElement('audio');
                 audio.controls = true;
                 audio.src = url;
+                audio.style.filter = 'invert(100%) hue-rotate(180deg)';
                 container.appendChild(audio);
             } else if (tipo.startsWith('video/')) {
-                // Preview para videos
                 const video = document.createElement('video');
                 video.controls = true;
                 video.src = url;
                 container.appendChild(video);
             } else {
-                // Preview básico para Documentos (PDF, Word, Text)
                 container.innerHTML = `
                     <div class="doc-icon">📁</div>
-                    <strong>${archivo.name}</strong><br>
-                    <small>(${roundSize(archivo.size)} - ${tipo || 'Documento'})</small>
+                    <strong style="color: var(--accent);">${archivo.name}</strong><br>
+                    <small style="color: var(--text-muted);">(${roundSize(archivo.size)} - ${tipo || 'Documento'})</small>
                 `;
             }
         }
@@ -283,7 +569,7 @@
                         serviceUrl: 'https://router.project-osrm.org/route/v1'
                     }),
                     lineOptions: {
-                        styles: [{ color: '#0c4b33', weight: 6 }]
+                        styles: [{ color: '#20c997', weight: 6 }]
                     },
                     language: 'es',
                     show: false
