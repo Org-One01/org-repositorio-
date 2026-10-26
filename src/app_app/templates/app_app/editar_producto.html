@@ -5,14 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Prenda</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; padding: 40px; display: flex; justify-content: center; }
-        .card { background: #1e1e1e; padding: 2rem; border-radius: 12px; border: 1px solid #333; max-width: 500px; width: 100%; }
-        h2 { color: #20c997; margin-top: 0; }
-        label { display: block; margin-top: 10px; color: #a0a0a0; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; background: #2a2a2a; border: 1px solid #333; border-radius: 6px; color: #fff; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #20c997; color: #121212; border: none; border-radius: 6px; font-weight: bold; margin-top: 20px; cursor: pointer; }
-        button:hover { background: #1ba87e; }
-        .btn-cancel { display: block; text-align: center; margin-top: 15px; color: #a0a0a0; text-decoration: none; }
+        body { font-family:'Segoe UI',sans-serif; background:#121212; color:#e0e0e0;
+               padding:40px; display:flex; justify-content:center; }
+        .card { background:#1e1e1e; padding:2rem; border-radius:12px;
+                border:1px solid #333; max-width:620px; width:100%; }
+        h2 { color:#20c997; margin-top:0; }
+        h4 { color:#20c997; margin:18px 0 4px 0; font-size:0.95rem;
+             border-bottom:1px solid #333; padding-bottom:6px; }
+        label { display:block; margin-top:10px; color:#a0a0a0; font-size:0.9rem; }
+        input, select, textarea {
+            width:100%; padding:10px; margin-top:5px; background:#2a2a2a;
+            border:1px solid #333; border-radius:6px; color:#fff;
+            box-sizing:border-box; font-family:inherit;
+        }
+        select[multiple] { height:90px; }
+        button { width:100%; padding:12px; background:#20c997; color:#121212;
+                 border:none; border-radius:6px; font-weight:bold; margin-top:20px; cursor:pointer; }
+        button:hover { background:#1ba87e; }
+        .btn-cancel { display:block; text-align:center; margin-top:15px;
+                      color:#a0a0a0; text-decoration:none; }
     </style>
 </head>
 <body>
@@ -20,15 +31,18 @@
         <h2>✏️ Editar Prenda</h2>
         <form method="POST">
             {% csrf_token %}
+
+            <!-- ── DATOS BÁSICOS ── -->
+            <h4>📦 Datos básicos</h4>
             <label>Nombre:</label>
             <input type="text" name="nombre" value="{{ producto.nombre }}" required>
 
             <label>Categoría:</label>
             <select name="categoria">
-                <option value="CAMISA" {% if producto.categoria == 'CAMISA' %}selected{% endif %}>Camisa / Camiseta</option>
-                <option value="PANTALON" {% if producto.categoria == 'PANTALON' %}selected{% endif %}>Pantalón / Jean</option>
-                <option value="CHAQUETA" {% if producto.categoria == 'CHAQUETA' %}selected{% endif %}>Chaqueta / Abrigo</option>
-                <option value="CALZADO" {% if producto.categoria == 'CALZADO' %}selected{% endif %}>Calzado</option>
+                <option value="CAMISA"    {% if producto.categoria == 'CAMISA' %}selected{% endif %}>Camisa / Camiseta</option>
+                <option value="PANTALON"  {% if producto.categoria == 'PANTALON' %}selected{% endif %}>Pantalón / Jean</option>
+                <option value="CHAQUETA"  {% if producto.categoria == 'CHAQUETA' %}selected{% endif %}>Chaqueta / Abrigo</option>
+                <option value="CALZADO"   {% if producto.categoria == 'CALZADO' %}selected{% endif %}>Calzado</option>
                 <option value="ACCESORIO" {% if producto.categoria == 'ACCESORIO' %}selected{% endif %}>Accesorio</option>
             </select>
 
@@ -37,6 +51,55 @@
 
             <label>Precio ($):</label>
             <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" required>
+
+            <!-- ── 1:N PROVEEDOR ── -->
+            <h4>🏭 1:N — Proveedor</h4>
+            <label>Proveedor:</label>
+            <select name="proveedor_id">
+                <option value="">— Sin proveedor —</option>
+                {% for proveedor in proveedores %}
+                    <option value="{{ proveedor.id }}"
+                        {% if producto.proveedor and producto.proveedor.id == proveedor.id %}selected{% endif %}>
+                        {{ proveedor.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+
+    <!-- ── N:N ETIQUETAS Y COLECCIONES ── -->
+<h4>🏷️ N:N — Etiquetas y Colecciones</h4>
+<label>Etiquetas (Ctrl+Click = varias):</label>
+<select name="etiquetas_ids" multiple>
+    {% for etiqueta in etiquetas %}
+        <option value="{{ etiqueta.id }}"
+            {% if etiqueta.id in etiquetas_act %}selected{% endif %}>
+            {{ etiqueta.nombre }}
+        </option>
+    {% endfor %}
+</select>
+
+<label>Colecciones (Ctrl+Click = varias):</label>
+<select name="colecciones_ids" multiple>
+    {% for coleccion in colecciones %}
+        <option value="{{ coleccion.id }}"
+            {% if coleccion.id in colecciones_act %}selected{% endif %}>
+            {{ coleccion.nombre }}
+        </option>
+    {% endfor %}
+</select>
+
+<!-- ── 1:1 DETALLE ── -->
+<h4>📝 1:1 — Detalle del producto</h4>
+<label>Descripción:</label>
+<textarea name="descripcion" rows="2">{{ detalle.descripcion|default:'' }}</textarea>
+
+<label>Material:</label>
+<input type="text" name="material" value="{{ detalle.material|default:'' }}">
+
+<label>País de fabricación:</label>
+<input type="text" name="pais_fabricacion" value="{{ detalle.pais_fabricacion|default:'' }}">
+
+<label>Instrucciones de cuidado:</label>
+<input type="text" name="instrucciones_cuidado" value="{{ detalle.instrucciones_cuidado|default:'' }}">
 
             <button type="submit">Guardar Cambios</button>
             <a href="/?db={{ db_engine }}" class="btn-cancel">Cancelar</a>

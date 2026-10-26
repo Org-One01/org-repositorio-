@@ -375,231 +375,149 @@
             </div>
 
             <!-- Formulario para agregar prendas -->
-            <form method="POST" class="catalogo-form">
-                {% csrf_token %}
-                <input type="hidden" name="guardar_ropa" value="1">
-                <input type="hidden" name="db_activa" value="{{ db_seleccionada }}">
-                
-                <div class="form-group">
-                    <label>Nombre prenda:</label>
-                    <input type="text" name="nombre_ropa" placeholder="Ej: Camiseta Oversize" required>
-                </div>
-                <div class="form-group">
-                    <label>Categoría:</label>
-                    <select name="categoria_ropa">
-                        <option value="CAMISA">Camisa / Camiseta</option>
-                        <option value="PANTALON">Pantalón / Jean</option>
-                        <option value="CHAQUETA">Chaqueta / Abrigo</option>
-                        <option value="CALZADO">Calzado</option>
-                        <option value="ACCESORIO">Accesorio</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Talla:</label>
-                    <input type="text" name="talla_ropa" placeholder="S, M, L, XL" required>
-                </div>
-                <div class="form-group">
-                    <label>Precio ($):</label>
-                    <input type="number" step="0.01" name="precio_ropa" placeholder="49.99" required>
-                </div>
-                <div style="grid-column: 1 / -1; margin-top: 10px;">
-                    <button type="submit">Guardar Prenda en {{ engine_name }}</button>
-                </div>
-            </form>
+<form method="POST" class="catalogo-form">
+    {% csrf_token %}
+    <input type="hidden" name="guardar_ropa" value="1">
+    <input type="hidden" name="db_activa" value="{{ db_seleccionada }}">
 
-            <!-- Tabla de prendas registradas -->
-            <h4 style="margin-top: 30px;">Prendas Guardadas en {{ engine_name }}</h4>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Talla</th>
-                            <th>Precio</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for producto in productos_ropa %}
-                        <tr>
-                            <td>{{ producto.id }}</td>
-                            <td>{{ producto.nombre }}</td>
-                            <td>{{ producto.categoria }}</td>
-                            <td>{{ producto.talla }}</td>
-                            <td>${{ producto.precio }}</td>
-                            <td>
-                                <a href="{% url 'editar_producto' db_engine=db_seleccionada pk=producto.id %}" class="btn-action btn-warning">
-                                    ✏️ Editar
-                                </a>
-                                <a href="{% url 'eliminar_producto' db_engine=db_seleccionada pk=producto.id %}" class="btn-action btn-danger">
-                                    🗑️ Eliminar
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">
-                                No hay prendas registradas aún en {{ engine_name }}.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 4. Imagen Externa -->
-        <div class="card">
-            <h3>Imagen Externa</h3>
-            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="Tecnología">
-        </div>
-
-        <!-- 5. Audio -->
-        <div class="card">
-            <h3>Reproductor de Audio</h3>
-            <audio controls>
-                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-            </audio>
-        </div>
-
-        <!-- 6. Video -->
-        <div class="card">
-            <h3>Video Demostrativo</h3>
-            <video controls poster="https://interactive-examples.mdn.mozilla.net/media/cc0-images/flower.jpg">
-                <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-            </video>
-        </div>
-
-        <!-- 7. Modelo 3D -->
-        <div class="card">
-            <h3>Visor de Modelo 3D</h3>
-            <model-viewer 
-                src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-                alt="Astronauta" 
-                auto-rotate 
-                camera-controls 
-                style="height: 250px; background-color: #111;">
-            </model-viewer>
-        </div>
-
-        <!-- 8. Mapa Interactivo -->
-        <div class="card card-full">
-            <h3>Mapa y Trazado de Ruta Real</h3>
-            <button onclick="obtenerUbicacionActual()" style="max-width: 300px; margin: 0 auto 15px auto; display: block;">Usar mi Ubicación de Origen</button>
-            <div id="map"></div>
-        </div>
+    <!-- ── DATOS BÁSICOS ── -->
+    <h4 style="grid-column: 1 / -1; margin: 5px 0;">📦 Datos básicos</h4>
+    <div class="form-group">
+        <label>Nombre prenda:</label>
+        <input type="text" name="nombre_ropa" placeholder="Ej: Camiseta Oversize" required>
+    </div>
+    <div class="form-group">
+        <label>Categoría:</label>
+        <select name="categoria_ropa">
+            <option value="CAMISA">Camisa / Camiseta</option>
+            <option value="PANTALON">Pantalón / Jean</option>
+            <option value="CHAQUETA">Chaqueta / Abrigo</option>
+            <option value="CALZADO">Calzado</option>
+            <option value="ACCESORIO">Accesorio</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Talla:</label>
+        <input type="text" name="talla_ropa" placeholder="S, M, L, XL" required>
+    </div>
+    <div class="form-group">
+        <label>Precio ($):</label>
+        <input type="number" step="0.01" name="precio_ropa" placeholder="49.99" required>
     </div>
 
-    <!-- Scripts de Leaflet -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <!-- ── 1:N PROVEEDOR ── -->
+    <h4 style="grid-column: 1 / -1; margin: 10px 0 5px 0;">🏭 1:N — Proveedor</h4>
+    <div class="form-group" style="grid-column: 1 / -1;">
+        <label>Proveedor (un proveedor → muchos productos):</label>
+        <select name="proveedor_id">
+            <option value="">— Sin proveedor —</option>
+            {% for proveedor in proveedores %}
+                <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-    <script>
-        function mostrarPreview(event) {
-            const archivo = event.target.files[0];
-            const container = document.getElementById('preview-container');
-            container.innerHTML = '';
+    <!-- ── N:N ETIQUETAS Y COLECCIONES ── -->
+    <h4 style="grid-column: 1 / -1; margin: 10px 0 5px 0;">🏷️ N:N — Etiquetas y Colecciones</h4>
+    <div class="form-group">
+        <label>Etiquetas (Ctrl+Click = varias):</label>
+        <select name="etiquetas_ids" multiple style="height: 90px;">
+            {% for etiqueta in etiquetas %}
+                <option value="{{ etiqueta.id }}">{{ etiqueta.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Colecciones (Ctrl+Click = varias):</label>
+        <select name="colecciones_ids" multiple style="height: 90px;">
+            {% for coleccion in colecciones %}
+                <option value="{{ coleccion.id }}">{{ coleccion.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-            if (!archivo) {
-                container.style.display = 'none';
-                return;
-            }
+    <!-- ── 1:1 DETALLE ── -->
+    <h4 style="grid-column: 1 / -1; margin: 10px 0 5px 0;">📝 1:1 — Detalle del producto</h4>
+    <div class="form-group" style="grid-column: 1 / -1;">
+        <label>Descripción:</label>
+        <textarea name="descripcion" rows="2"
+                  style="width:100%; padding:10px; background:var(--bg-input);
+                         border:1px solid var(--border-color); border-radius:6px;
+                         color:var(--text-main); font-family:inherit;"></textarea>
+    </div>
+    <div class="form-group">
+        <label>Material:</label>
+        <input type="text" name="material" placeholder="Ej: Algodón 100%">
+    </div>
+    <div class="form-group">
+        <label>País de fabricación:</label>
+        <input type="text" name="pais_fabricacion" placeholder="Ej: Colombia">
+    </div>
+    <div class="form-group" style="grid-column: 1 / -1;">
+        <label>Instrucciones de cuidado:</label>
+        <input type="text" name="instrucciones_cuidado" placeholder="Ej: Lavar en frío">
+    </div>
 
-            container.style.display = 'block';
-            const url = URL.createObjectURL(archivo);
-            const tipo = archivo.type;
+    <div style="grid-column: 1 / -1; margin-top: 10px;">
+        <button type="submit">Guardar Prenda en {{ engine_name }}</button>
+    </div>
+</form>
 
-            if (tipo.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = url;
-                container.appendChild(img);
-            } else if (tipo.startsWith('audio/')) {
-                const audio = document.createElement('audio');
-                audio.controls = true;
-                audio.src = url;
-                audio.style.filter = 'invert(100%) hue-rotate(180deg)';
-                container.appendChild(audio);
-            } else if (tipo.startsWith('video/')) {
-                const video = document.createElement('video');
-                video.controls = true;
-                video.src = url;
-                container.appendChild(video);
-            } else {
-                container.innerHTML = `
-                    <div class="doc-icon">📁</div>
-                    <strong style="color: var(--accent);">${archivo.name}</strong><br>
-                    <small style="color: var(--text-muted);">(${roundSize(archivo.size)} - ${tipo || 'Documento'})</small>
-                `;
-            }
-        }
-
-        function roundSize(bytes) {
-            return (bytes / 1024).toFixed(2) + ' KB';
-        }
-
-        // Configuración de Leaflet
-        let map = L.map('map').setView([4.6097, -74.0817], 13);
-
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri'
-        }).addTo(map);
-
-        let controlRuta = null;
-        let puntoOrigen = null;
-        let puntoDestino = null;
-
-        function calcularRuta() {
-            if (puntoOrigen && puntoDestino) {
-                if (controlRuta) {
-                    map.removeControl(controlRuta);
-                }
-
-                controlRuta = L.Routing.control({
-                    waypoints: [
-                        L.latLng(puntoOrigen.lat, puntoOrigen.lng),
-                        L.latLng(puntoDestino.lat, puntoDestino.lng)
-                    ],
-                    router: L.Routing.osrmv1({
-                        serviceUrl: 'https://router.project-osrm.org/route/v1'
-                    }),
-                    lineOptions: {
-                        styles: [{ color: '#20c997', weight: 6 }]
-                    },
-                    language: 'es',
-                    show: false
-                }).addTo(map);
-            }
-        }
-
-        map.on('click', function(e) {
-            if (!puntoOrigen) {
-                puntoOrigen = e.latlng;
-                L.marker(puntoOrigen).addTo(map).bindPopup("Origen").openPopup();
-            } else if (!puntoDestino) {
-                puntoDestino = e.latlng;
-                L.marker(puntoDestino).addTo(map).bindPopup("Destino").openPopup();
-                calcularRuta();
-            } else {
-                location.reload(); 
-            }
-        });
-
-        function obtenerUbicacionActual() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    puntoOrigen = { lat: lat, lng: lng };
-
-                    map.setView([lat, lng], 15);
-                    L.marker([lat, lng]).addTo(map).bindPopup("Tu ubicación").openPopup();
-                }, (error) => {
-                    alert("Error de ubicación: " + error.message);
-                });
-            }
-        }
-    </script>
-</body>
-</html>
+<!-- Tabla de prendas registradas -->
+<h4 style="margin-top: 30px;">Prendas Guardadas en {{ engine_name }}</h4>
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Talla</th>
+                <th>Precio</th>
+                <th>Proveedor</th>
+                <th>Etiquetas</th>
+                <th>Variantes</th>
+                <th>Reseñas</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos_ropa %}
+            <tr>
+                <td>{{ producto.id }}</td>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.categoria }}</td>
+                <td>{{ producto.talla }}</td>
+                <td>${{ producto.precio }}</td>
+                <td>{{ producto.proveedor.nombre|default:"—" }}</td>
+                <td>
+                    {% for etiqueta in producto.etiquetas.all %}
+                        <span style="background:#2a2a2a; padding:2px 8px; border-radius:10px;
+                                     font-size:0.78rem; display:inline-block; margin:1px;">
+                            {{ etiqueta.nombre }}
+                        </span>
+                    {% empty %}—{% endfor %}
+                </td>
+                <td>{{ producto.variantes.count }}</td>
+<td>
+    {% with n=producto.resenas.count %}
+        {% if n %}{{ n }} ({{ producto.promedio_calificacion|floatformat:1 }}★){% else %}—{% endif %}
+    {% endwith %}
+</td>
+                <td>
+                    <a href="{% url 'editar_producto' db_engine=db_seleccionada pk=producto.id %}"
+                       class="btn-action btn-warning">✏️ Editar</a>
+                    <a href="{% url 'eliminar_producto' db_engine=db_seleccionada pk=producto.id %}"
+                       class="btn-action btn-danger">🗑️ Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" style="text-align:center; color:var(--text-muted); padding:20px;">
+                    No hay prendas registradas aún en {{ engine_name }}.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

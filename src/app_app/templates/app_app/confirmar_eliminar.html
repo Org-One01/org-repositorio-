@@ -5,18 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmar Eliminación</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; padding: 40px; display: flex; justify-content: center; }
-        .card { background: #1e1e1e; padding: 2rem; border-radius: 12px; border: 1px solid #ef4444; max-width: 450px; width: 100%; text-align: center; }
-        h2 { color: #ef4444; margin-top: 0; }
-        button { width: 100%; padding: 12px; background: #ef4444; color: #fff; border: none; border-radius: 6px; font-weight: bold; margin-top: 20px; cursor: pointer; }
-        button:hover { background: #dc2626; }
-        .btn-cancel { display: block; text-align: center; margin-top: 15px; color: #a0a0a0; text-decoration: none; }
+        body { font-family:'Segoe UI',sans-serif; background:#121212; color:#e0e0e0;
+               padding:40px; display:flex; justify-content:center; }
+        .card { background:#1e1e1e; padding:2rem; border-radius:12px;
+                border:1px solid #ef4444; max-width:520px; width:100%; text-align:center; }
+        h2 { color:#ef4444; margin-top:0; }
+        .cascade { background:#2a2a2a; border-left:3px solid #ef4444;
+                   padding:12px; border-radius:6px; text-align:left;
+                   font-size:0.9rem; margin:15px 0; }
+        .cascade strong { color:#ef4444; }
+        .cascade ul { margin:6px 0 0 18px; padding:0; color:#a0a0a0; }
+        button { width:100%; padding:12px; background:#ef4444; color:#fff;
+                 border:none; border-radius:6px; font-weight:bold; margin-top:20px; cursor:pointer; }
+        button:hover { background:#dc2626; }
+        .btn-cancel { display:block; text-align:center; margin-top:15px;
+                      color:#a0a0a0; text-decoration:none; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>🗑️ Eliminar Prenda</h2>
-        <p>¿Estás seguro de que deseas eliminar <strong>"{{ producto.nombre }}"</strong> de la base de datos <code>{{ db_engine }}</code>?</p>
+        <p>¿Seguro que quieres eliminar
+           <strong>"{{ producto.nombre }}"</strong>
+           de la base de datos <code>{{ db_engine }}</code>?</p>
+
+        <!-- Información de borrado en cascada por las relaciones -->
+      <div class="cascade">
+    <strong>⚠️ Se eliminarán también (ON DELETE CASCADE):</strong>
+    <ul>
+        {% if tiene_detalle %}
+            <li>📝 Detalle 1:1 de la prenda</li>
+        {% endif %}
+        {% if variantes_count %}
+            <li>🎨 {{ variantes_count }} variante(s) 1:N</li>
+        {% endif %}
+        {% if resenas_count %}
+            <li>⭐ {{ resenas_count }} reseña(s) 1:N</li>
+        {% endif %}
+        <li>🏷️ Vínculos N:N con etiquetas (las etiquetas NO se borran)</li>
+        <li>📚 Vínculos N:N con colecciones (las colecciones NO se borran)</li>
+    </ul>
+    <p style="margin:10px 0 0 0; color:#a0a0a0; font-size:0.85rem;">
+        ℹ️ El <strong>proveedor</strong> NO se elimina
+        (<code>on_delete=SET_NULL</code> en la relación 1:N).
+    </p>
+</div>
+
         <form method="POST">
             {% csrf_token %}
             <button type="submit">Sí, Eliminar</button>
